@@ -7,7 +7,8 @@ import java.util.*;
 // Biweekly schedule with PayStubs accounting for biweekly work
 
 public class ScheduleBuilder {
-	static List<Employee> employees = new ArrayList<>();
+	static Map<String, Integer> employees = new HashMap<>();
+	static List<String> requests = new ArrayList<>();
 	//For now we will not focus on creating the schedule lets just seed the data
 	static int[][] schedules =
 		{
@@ -22,13 +23,13 @@ public class ScheduleBuilder {
 		};
 	public static void main(String[] args) {
 		//Name, Hourly Rate, EmployeeID
-		Employee bob = new ManagementEmployee("Bob", 22.0, 0 );
+		ManagementEmployee bob = new ManagementEmployee("Bob", 22.0, 0 );
 		System.out.println(bob.getName());
 		bob.getSchedule();
 		System.out.println("Pay " + bob.getWeeksPay() + "\n");
 
 		//Name, Hourly Rate, EmployeeID
-		Employee janet = new ManagementEmployee("Janet", 220.0, 1);
+		ManagementEmployee janet = new ManagementEmployee("Janet", 220.0, 1);
 		System.out.println(janet.getName());
 		janet.getSchedule();
 		System.out.println("Pay " + janet.getWeeksPay() + "\n");
@@ -38,30 +39,44 @@ public class ScheduleBuilder {
 		String str3 = "FIRST";
 		bob.swapSchedule(bob, janet, Day.valueOf(str1), Week.valueOf(str3));
 		bob.wipeSchedule(bob, Day.valueOf(str2), Week.valueOf(str3));
+		bob.wipeSchedule(bob, Day.valueOf("MONDAY"), Week.valueOf(str3));
 		bob.getSchedule();
-//		System.out.println(bob.getName());
-//		bob.getSchedule();
-//		System.out.println("Pay " + bob.getWeeksPay() + "\n");
-//		System.out.println(janet.getName());
-//		janet.getSchedule();
-//		System.out.println("Pay " + janet.getWeeksPay() + "\n");
-//
-//		employees.add(bob);
-//		employees.add(janet);
-//		printEmployeeList();
+		System.out.println(bob.getWeeksPay());
+
+		System.out.println(bob.getName());
+		bob.getSchedule();
+		System.out.println("Pay " + bob.getWeeksPay() + "\n");
+		System.out.println(janet.getName());
+		janet.getSchedule();
+		System.out.println("Pay " + janet.getWeeksPay() + "\n");
+
+		employees.put(bob.getName(), bob.getID());
+		employees.put(janet.getName(), janet.getID());
+		printEmployeeList();
+
+		LineWorkEmployee steven = new LineWorkEmployee("Steven", 12.99, 2);
+		steven.requestSwap(bob, steven, Day.valueOf(str2), Week.valueOf(str3));
+		viewRequests();
+
 	}
 	static void printEmployeeList() {
-		System.out.println("\n Employee List:");
-		for(Employee x : employees) {
-			System.out.println(x.getName());
+
+		System.out.println("Employee List:");
+
+        // using for-each loop for iteration over Map.entrySet()
+        for (Map.Entry<String,Integer> entry : employees.entrySet())
+            System.out.println("Name: " + entry.getKey() + "\t ID: " + entry.getValue());
+	}
+	static void printMasterSchedule() {
+		//Print employee working each day and shift they are working
+	}
+	static void viewRequests() {
+		System.out.println("Current Requests:");
+		for(String x: requests) {
+			System.out.println(x);
 		}
 	}
-
-	static void printMasterSchedule() {
-	}
-
 }
-
 enum Day{
 	MONDAY,
 	TUESDAY,
@@ -75,33 +90,30 @@ enum Week{
 	FIRST,
 	SECOND
 }
-
-abstract class Employee {
+class Employee {
 	String name;
 	double payRate;
 	int employeeID;
 	PayStub check;
-	abstract String getName();
-	abstract boolean swapSchedule(Employee employee1, Employee employee2, Day day, Week week);
-	abstract boolean wipeSchedule(Employee employee, Day day, Week week);
-	abstract double getWeeksPay();
-	abstract double getHours();
-	abstract void getSchedule();
-
-	public Employee(String name, double payRate, int employeeID){
-		this.name = name;
-		this.payRate = payRate;
-		this.employeeID = employeeID;
+	String getName() {
+		return name;
 	}
-}
-
-class ManagementEmployee extends Employee{
-
-	public ManagementEmployee(String name, double payRate, int employeeID) {
-		super(name, payRate, employeeID);
-		check = new PayStub(getHours(), payRate);
+	double getWeeksPay() {
+		check.hours = getHours(); //Get latest hours
+		return check.getAmount();
 	}
-
+	double getHours() {
+		int daysWorked = 0;
+		//Iterate through this weeks schedule and calculate amount of days worked then perform calculation to get hours
+		for(int i = employeeID*2; i <= employeeID*2+1; i++) {
+			for(int j = 0; j < ScheduleBuilder.schedules[i].length; j++) {
+				if(ScheduleBuilder.schedules[i][j] == 1 || ScheduleBuilder.schedules[i][j] == 2) {
+					daysWorked++;
+				}
+			}
+		}
+		return daysWorked * 8;
+	}
 	void getSchedule() {
 		int week = 0;
 
@@ -190,32 +202,21 @@ class ManagementEmployee extends Employee{
 			week++;
 		}
 	}
-
-	String getName() {
-		return name;
+	int getID() {
+		return employeeID;
 	}
-
-	double getWeeksPay() {
-		check.hours = getHours(); //Get latest hours
-		return check.getAmount();
+	public Employee(String name, double payRate, int employeeID){
+		this.name = name;
+		this.payRate = payRate;
+		this.employeeID = employeeID;
 	}
-	double getHours() {
-		int daysWorked = 0;
-		//Iterate through this weeks schedule and calculate amount of days worked then perform calculation to get hours
-		for(int i = employeeID*2; i <= employeeID*2+1; i++) {
-			for(int j = 0; j < ScheduleBuilder.schedules[i].length; j++) {
-				if(ScheduleBuilder.schedules[i][j] == 1 || ScheduleBuilder.schedules[i][j] == 2) {
-					daysWorked++;
-				}
-			}
-		}
-		return daysWorked * 8;
+}
+class ManagementEmployee extends Employee{
+	public ManagementEmployee(String name, double payRate, int employeeID) {
+		super(name, payRate, employeeID);
+		check = new PayStub(getHours(), payRate);
 	}
-
-	//Wipe day
 	boolean wipeSchedule(Employee employee, Day day, Week week) {
-
-
 		int row = -1, col = -1;
 		int id = employee.employeeID * 2; // 0
 
@@ -254,9 +255,7 @@ class ManagementEmployee extends Employee{
 		ScheduleBuilder.schedules[id+row][col] = 0;
 
 		return true;
-
 	}
-	//Should swap one day's schedule
 	boolean swapSchedule(Employee employee1, Employee employee2, Day day, Week week) {
 
 		int row = -1, col = -1;
@@ -302,29 +301,32 @@ class ManagementEmployee extends Employee{
 		ScheduleBuilder.schedules[id2+row][col] = temp;
 
 		return true;
-
 	}
 }
 
-//boolean requestSwap(Employee employee1, Employee employee2) {
-//return false;
-//}
-//
-//boolean requestWipe() {
-//return false;
-//}
+class LineWorkEmployee extends Employee{
+	public LineWorkEmployee(String name, double payRate, int employeeID) {
+		super(name, payRate, employeeID);
+		check = new PayStub(getHours(), payRate);
+	}
+	boolean requestSwap(Employee employee1, Employee employee2, Day day, Week week) {
+
+		ScheduleBuilder.requests.add("Employee: " + employee1.employeeID + " Employee: " + employee2.employeeID + " Day: " + day + " Week: "+ week);
+		return true;
+	}
+	boolean requestWipe(Day day, Week week) {
+		return false;
+	}
+}
+
 
 class PayStub{
-
 	double hours, payRate, minsLate;
-
 	public PayStub(double hours, double payRate) {
 		this.hours = hours;
 		this.payRate = payRate;
 	}
-
 	double getAmount() {
 		return hours * payRate;
-
 	}
 }
