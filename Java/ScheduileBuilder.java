@@ -9,7 +9,8 @@ import java.util.*;
 //TBD: 
 // 1) Actual generation of schedules (random numbers for easy way out, or somehow manual input and compare to see if schedule conflict)
 // 2) UI in console to accept I/O
-// 3) Visual improvements of tables in console
+// 3) Visual improvements of tables in console -- COMPLETED
+// 4) printMasterSchedule (oh boy)
 
 public class ScheduleBuilder {
 	static Map<String, Integer> employees = new HashMap<>();
@@ -35,9 +36,9 @@ public class ScheduleBuilder {
 		employees.put(steven.getName(), steven.getID());
 		printEmployeeList();
 		
-		System.out.println("\nBob's Schedule\n");
+		System.out.println("\nBob's Schedule");
 		bob.getSchedule();
-		System.out.println("\n\nSteven's Schedule\n");
+		System.out.println("\nSteven's Schedule");
 		steven.getSchedule();
 		
 		
@@ -51,12 +52,11 @@ public class ScheduleBuilder {
 		
 		bob.swapSchedule(steven, bob, Day.valueOf("Tuesday"), Week.valueOf("one"));
 		System.out.println("\nApproved Swap Request");
-		System.out.println("\nNEW Schedule");
-		System.out.println("\nBob's Schedule\n");
+		System.out.println("\n\n\n\n\nNEW Schedule");
+		System.out.println("\nBob's Schedule");
 		bob.getSchedule();
-		System.out.println("\n\nSteven's Schedule\n");
+		System.out.println("\nSteven's Schedule");
 		steven.getSchedule();
-		
 		
 		clearRequests();
 		viewRequests();
@@ -80,7 +80,7 @@ public class ScheduleBuilder {
 		System.out.println("----------------------------------------------");
 	}
 	static void clearRequests() {
-		System.out.println("Cleared Requests!");
+		System.out.println("\nCleared Requests!");
 		requests.clear();;
 	}
 }
@@ -125,6 +125,9 @@ class Employee {
 	void getSchedule() {
 		int week = 0;
 		
+		String mon = "", tues = "", weds = "", thurs = "", fri = "", sat = "", sun = "";
+		
+		
 		for(int j = employeeID*2; j <= (employeeID*2+1); j++) {
 			if(week == 0) {
 				System.out.println("Week 1");
@@ -136,80 +139,84 @@ class Employee {
 				if(ScheduleBuilder.schedules[j][i] == 1) {
 					switch(i) {
 						case 0:
-							System.out.print(" | Mon: Morning");
+							mon = "Monday: Morning";
 							break;
 						case 1:
-							System.out.print(" | Tues: Morning");
+							tues = "Tuesday: Morning";
 							break;
 						case 2:
-							System.out.print(" | Weds: Morning");
+							weds = "Wedneday: Morning";
 							break;
 						case 3:
-							System.out.print(" | Thurs: Morning" );
+							thurs = "Thursday: Morning";
 							break;
 						case 4:
-							System.out.print(" | Fri: Morning" );
+							fri = "Friday: Morning";
 							break;
 						case 5:
-							System.out.print(" | Sat: Morning" );
+							sat = "Saturday: Morning";
 							break;
 						case 6:
-							System.out.println(" | Sun: Morning | " );
+							sun = "Sunday: Morning";
 							break;
 					}
 				}
 				else if (ScheduleBuilder.schedules[j][i] == 2) {
 					switch(i) {
 						case 0:
-							System.out.print(" | Mon: Night" );
+							mon = "Monday: Night";
 							break;
 						case 1:
-							System.out.print(" | Tues: Night" );
+							tues = "Tuesday: Night";
 							break;
 						case 2:
-							System.out.print(" | Weds: Night" );
+							weds = "Wedneday: Night";
 							break;
 						case 3:
-							System.out.print(" | Thurs: Night" );
+							thurs = "Thursday: Night";
 							break;
 						case 4:
-							System.out.print(" | Fri: Night" );
+							fri = "Friday: Night";
 							break;
 						case 5:
-							System.out.print(" | Sat: Night" );
+							sat = "Saturday: Night";
 							break;
 						case 6:
-							System.out.println(" | Sun: Night | " );
+							sun = "Sunday: Night";
 							break;
 					}
 				}
 				else{
 					switch(i) {
 						case 0:
-							System.out.print(" | Mon: Off");
+							mon = "Monday: Off";
 							break;
 						case 1:
-							System.out.print(" | Tues: Off");
+							tues = "Tuesday: Off";
 							break;
 						case 2:
-							System.out.print(" | Weds: Off");
+							weds = "Wedneday: Off";
 							break;
 						case 3:
-							System.out.print(" | Thurs: Off");
+							thurs = "Thursday: Off";
 							break;
 						case 4:
-							System.out.print(" | Fri: Off");
+							fri = "Friday: Off";
 							break;
 						case 5:
-							System.out.print(" | Sat: Off");
+							sat = "Saturday: Off";
 							break;
 						case 6:
-							System.out.println(" | Sun: Off | ");
+							sun = "Sunday: Off";
 							break;
 					}
 				}
 			}
 			week++;
+			System.out.format("+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+%n");
+			String leftAlignFormat = "| %-19s | %-19s | %-19s | %-19s | %-19s | %-19s | %-19s | %n";
+				System.out.format(leftAlignFormat, mon , tues, weds, thurs, fri, sat, sun);
+			System.out.format("+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+%n");
 		}
 	}
 	int getID() {
@@ -313,7 +320,6 @@ class ManagementEmployee extends Employee{
 		return true;
 	}
 }
-
 class LineWorkEmployee extends Employee{
 	public LineWorkEmployee(String name, double payRate, int employeeID) {
 		super(name, payRate, employeeID);
@@ -328,8 +334,6 @@ class LineWorkEmployee extends Employee{
 		return true;
 	}
 }
-
-
 class PayStub{
 	double hours, payRate, minsLate;
 	public PayStub(double hours, double payRate) {
