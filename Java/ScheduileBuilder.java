@@ -6,6 +6,11 @@ import java.util.*;
 // Assume we build schedules knowing our employee's availability beforehand
 // Biweekly schedule with PayStubs accounting for biweekly work
 
+//TBD: 
+// 1) Actual generation of schedules (random numbers for easy way out, or somehow manual input and compare to see if schedule conflict)
+// 2) UI in console to accept I/O
+// 3) Visual improvements of tables in console
+
 public class ScheduleBuilder {
 	static Map<String, Integer> employees = new HashMap<>();
 	static List<String> requests = new ArrayList<>();
@@ -14,81 +19,83 @@ public class ScheduleBuilder {
 		{
 			{1,0,1,1,1,0,1},	// Mon: Day 	Tues: Off 		Wed: Day 	Thurs: Day		Fri: Day 	Sat: Off 	Sun: Day
 			{2,1,0,2,0,1,2},	// Mon: Night 	Tues: Day 		Wed: Off 	Thurs: Night 	Fri: Off 	Sat: Day 	Sun: Night
-
+			
 			{0,2,2,0,2,2,0},	// Mon: Off 	Tues: Night 	Wed: Night 	Thurs: Off 	 	Fri: Night 	Sat: Night 	Sun: Off
 			{0,0,0,0,0,0,0},	// Mon: Off 	Tues: Off 		Wed: Off 	Thurs: Off 	 	Fri: Off 	Sat: Off 	Sun: Off
-
+			
 			{2,2,2,2,2,2,2},	// Mon: Night 	Tues: Night 	Wed: Night 	Thurs: Night	Fri: Night 	Sat: Night 	Sun: Night
 			{1,1,1,1,1,1,1}		// Mon: Day 	Tues: Day 		Wed: Night 	Thurs: Day		Fri: Day 	Sat: Day 	Sun: Day
 		};
 	public static void main(String[] args) {
 		//Name, Hourly Rate, EmployeeID
-		ManagementEmployee bob = new ManagementEmployee("Bob", 22.0, 0 );
-		System.out.println(bob.getName());
-		bob.getSchedule();
-		System.out.println("Pay " + bob.getWeeksPay() + "\n");
-
-		//Name, Hourly Rate, EmployeeID
-		ManagementEmployee janet = new ManagementEmployee("Janet", 220.0, 1);
-		System.out.println(janet.getName());
-		janet.getSchedule();
-		System.out.println("Pay " + janet.getWeeksPay() + "\n");
-
-		String str1 = "THURSDAY";
-		String str2 = "WEDNESDAY";
-		String str3 = "FIRST";
-		bob.swapSchedule(bob, janet, Day.valueOf(str1), Week.valueOf(str3));
-		bob.wipeSchedule(bob, Day.valueOf(str2), Week.valueOf(str3));
-		bob.wipeSchedule(bob, Day.valueOf("MONDAY"), Week.valueOf(str3));
-		bob.getSchedule();
-		System.out.println(bob.getWeeksPay());
-
-		System.out.println(bob.getName());
-		bob.getSchedule();
-		System.out.println("Pay " + bob.getWeeksPay() + "\n");
-		System.out.println(janet.getName());
-		janet.getSchedule();
-		System.out.println("Pay " + janet.getWeeksPay() + "\n");
-
+		ManagementEmployee bob = new ManagementEmployee("Bob", 100.0, 0 );
+		LineWorkEmployee steven = new LineWorkEmployee("Steven", 10.0, 2 );
+		
 		employees.put(bob.getName(), bob.getID());
-		employees.put(janet.getName(), janet.getID());
+		employees.put(steven.getName(), steven.getID());
 		printEmployeeList();
-
-		LineWorkEmployee steven = new LineWorkEmployee("Steven", 12.99, 2);
-		steven.requestSwap(bob, steven, Day.valueOf(str2), Week.valueOf(str3));
+		
+		System.out.println("\nBob's Schedule\n");
+		bob.getSchedule();
+		System.out.println("\n\nSteven's Schedule\n");
+		steven.getSchedule();
+		
+		
+		
+		steven.requestSwap(bob, Day.valueOf("Tuesday"), Week.valueOf("one"));
+		steven.requestWipe(Day.valueOf("Wednesday"), Week.valueOf("one"));
+		
+		
 		viewRequests();
 
+		
+		bob.swapSchedule(steven, bob, Day.valueOf("Tuesday"), Week.valueOf("one"));
+		System.out.println("\nApproved Swap Request");
+		System.out.println("\nNEW Schedule");
+		System.out.println("\nBob's Schedule\n");
+		bob.getSchedule();
+		System.out.println("\n\nSteven's Schedule\n");
+		steven.getSchedule();
+		
+		
+		clearRequests();
+		viewRequests();
+		
 	}
 	static void printEmployeeList() {
-
 		System.out.println("Employee List:");
-
-        // using for-each loop for iteration over Map.entrySet()
-        for (Map.Entry<String,Integer> entry : employees.entrySet())
-            System.out.println("Name: " + entry.getKey() + "\t ID: " + entry.getValue());
+		
+        // using for-each loop for iteration over Map.entrySet() 
+        for (Map.Entry<String,Integer> entry : employees.entrySet())  
+            System.out.println("Name: " + entry.getKey() + "\t ID: " + entry.getValue()); 
 	}
 	static void printMasterSchedule() {
 		//Print employee working each day and shift they are working
 	}
 	static void viewRequests() {
-		System.out.println("Current Requests:");
+		System.out.println("\n\n----------------------------------------------\n\nCurrent Requests\n");
 		for(String x: requests) {
-			System.out.println(x);
+			System.out.println(x + "\n");
 		}
+		System.out.println("----------------------------------------------");
+	}
+	static void clearRequests() {
+		System.out.println("Cleared Requests!");
+		requests.clear();;
 	}
 }
 enum Day{
-	MONDAY,
-	TUESDAY,
-	WEDNESDAY,
-	THURSDAY,
-	FRIDAY,
-	SATURDAY,
-	SUNDAY
+	Monday,
+	Tuesday,
+	Wednesday,
+	Thursday,
+	Friday,
+	Saturday,
+	Sunday
 }
 enum Week{
-	FIRST,
-	SECOND
+	one,
+	two
 }
 class Employee {
 	String name;
@@ -100,6 +107,7 @@ class Employee {
 	}
 	double getWeeksPay() {
 		check.hours = getHours(); //Get latest hours
+		System.out.println(check.getAmount());
 		return check.getAmount();
 	}
 	double getHours() {
@@ -116,12 +124,14 @@ class Employee {
 	}
 	void getSchedule() {
 		int week = 0;
-
+		
 		for(int j = employeeID*2; j <= (employeeID*2+1); j++) {
-			if(week == 0)
+			if(week == 0) {
 				System.out.println("Week 1");
-			else
+			}
+			else {
 				System.out.println("Week 2");
+			}
 			for(int i = 0; i < ScheduleBuilder.schedules[j].length; i++) {
 				if(ScheduleBuilder.schedules[j][i] == 1) {
 					switch(i) {
@@ -219,77 +229,77 @@ class ManagementEmployee extends Employee{
 	boolean wipeSchedule(Employee employee, Day day, Week week) {
 		int row = -1, col = -1;
 		int id = employee.employeeID * 2; // 0
-
+		
 		switch(day) {
-			case MONDAY:
+			case Monday:
 				col = 0;
-				break;
-			case TUESDAY:
+				break;	
+			case Tuesday:
 				col = 1;
 				break;
-			case WEDNESDAY:
+			case Wednesday:
 				col = 2;
 				break;
-			case THURSDAY:
+			case Thursday:
 				col = 3;
 				break;
-			case FRIDAY:
+			case Friday:
 				col = 4;
 				break;
-			case SATURDAY:
+			case Saturday:
 				col = 5;
 				break;
-			case SUNDAY:
+			case Sunday:
 				col = 6;
 				break;
 		}
 		switch(week) {
-			case FIRST:
+			case one:
 				row = 0;
-				break;
-			case SECOND:
+				break;	
+			case two:
 				row = 1;
 				break;
 		}
-
+		
 		ScheduleBuilder.schedules[id+row][col] = 0;
-
+		
 		return true;
 	}
 	boolean swapSchedule(Employee employee1, Employee employee2, Day day, Week week) {
-
+		
 		int row = -1, col = -1;
 		int id1 = employee1.employeeID * 2; // 0
 		int id2 = employee2.employeeID * 2; // 2
-
+		
 		switch(day) {
-			case MONDAY:
+			case Monday:
 				col = 0;
-				break;
-			case TUESDAY:
+				break;	
+			case Tuesday:
 				col = 1;
 				break;
-			case WEDNESDAY:
+			case Wednesday:
 				col = 2;
 				break;
-			case THURSDAY:
+			case Thursday:
 				col = 3;
 				break;
-			case FRIDAY:
+			case Friday:
 				col = 4;
 				break;
-			case SATURDAY:
+			case Saturday:
 				col = 5;
 				break;
-			case SUNDAY:
+			case Sunday:
 				col = 6;
 				break;
 		}
 		switch(week) {
-			case FIRST:
+			case one:
 				row = 0;
-				break;
-			case SECOND:
+				break;	
+			case two:
 				row = 1;
 				break;
 		}
@@ -299,7 +309,7 @@ class ManagementEmployee extends Employee{
 		ScheduleBuilder.schedules[id1+row][col] = ScheduleBuilder.schedules[id2+row][col];
 		//Now put temp into employee1
 		ScheduleBuilder.schedules[id2+row][col] = temp;
-
+		
 		return true;
 	}
 }
@@ -309,13 +319,13 @@ class LineWorkEmployee extends Employee{
 		super(name, payRate, employeeID);
 		check = new PayStub(getHours(), payRate);
 	}
-	boolean requestSwap(Employee employee1, Employee employee2, Day day, Week week) {
-
-		ScheduleBuilder.requests.add("Employee: " + employee1.employeeID + " Employee: " + employee2.employeeID + " Day: " + day + " Week: "+ week);
+	boolean requestSwap(Employee employee, Day day, Week week) {
+		ScheduleBuilder.requests.add("Requesting Swap: \n" + name + " with " + employee.name + " on " + day + " on Week " + week);
 		return true;
 	}
 	boolean requestWipe(Day day, Week week) {
-		return false;
+		ScheduleBuilder.requests.add("Requesting day off: \n" + name + " on " + day + " on Week " + week);
+		return true;
 	}
 }
 
@@ -330,3 +340,4 @@ class PayStub{
 		return hours * payRate;
 	}
 }
+
