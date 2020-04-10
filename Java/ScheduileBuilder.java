@@ -1,5 +1,3 @@
-package cs4080;
-
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -8,32 +6,21 @@ import java.util.Map.Entry;
 // Biweekly schedule with PayStubs accounting for biweekly work
 
 //TBD: 
-// 1) Actual generation of schedules -- COMPLETED
-// 2) UI in console to accept I/O -- REMOVED
-// 3) Visual improvements of tables in console -- COMPLETED
 // 4) printMasterSchedule (oh boy)
 
 public class ScheduleBuilder {
 	static Map<Integer, Employee> employees = new HashMap<>();
 	static List<String> requests = new ArrayList<>();
-	//For now we will not focus on creating the schedule lets just seed the data
-	static int[][] schedules =
-		{
-			{1,0,1,1,1,0,1},	
-			{0,1,0,0,0,1,0},	
-			
-			{0,1,0,1,0,1,0},	
-			{1,0,0,0,1,1,0},	
-			
-			{0,0,0,0,0,0,0},	
-			{1,1,1,1,1,1,1}		
-		};
+	static int[][] schedules;
+	
 	public static void main(String[] args) {
 		
+		//Sample availibility schedules
+		int[] temp1 = {1,1,0,1,0,1,0}; //Monday, Tuesday, Thursday, Saturday
+		int[] temp2 = {1,1,0,1,0,0,1}; //Monday, Tuesday, Thursday, Sunday
+		int[] temp3 = {0,0,1,0,1,0,1}; //Wednesday, Friday, Sunday
+		
 		//Name, Hourly Rate, EmployeeID
-		int[] temp1 = {0,1,0,1,0,1,0};
-		int[] temp2 = {1,1,0,1,0,0,1};
-		int[] temp3 = {0,0,1,0,1,0,1};
 		ManagementEmployee bob = new ManagementEmployee("Bob", 100.0, 0, temp1 );
 		ManagementEmployee janet = new ManagementEmployee("Janet", 200.0, 1, temp2 );
 		LineWorkEmployee steven = new LineWorkEmployee("Steven", 10.0, 2, temp3 );
@@ -41,33 +28,40 @@ public class ScheduleBuilder {
 		employees.put(bob.getID(), bob);
 		employees.put(steven.getID(), steven);
 		employees.put(janet.getID(), janet);
+		
 		printEmployeeList();
 		generateSchedule();
+		
+		System.out.println("\nBob's Schedule");
+		bob.getSchedule();
+		bob.getWeeksPay();
+		System.out.println("\nJanet's Schedule");
+		janet.getSchedule();
+		janet.getWeeksPay();
+		System.out.println("\nSteven's Schedule");
+		steven.getSchedule();
+		steven.getWeeksPay();
+		
+		
+		
+		steven.requestSwap(bob, Day.valueOf("Wednesday"), Week.valueOf("one"));
+		steven.requestWipe(Day.valueOf("Friday"), Week.valueOf("one"));
+		
+		
+		viewRequests();
+
+		
+		bob.swapSchedule(bob, steven, Day.valueOf("Wednesday"), Week.valueOf("one"));
+		System.out.println("\n\nApproved Swap Request");
+		System.out.println("\n\nNEW Schedule");
 		System.out.println("\nBob's Schedule");
 		bob.getSchedule();
 		System.out.println("\nSteven's Schedule");
 		steven.getSchedule();
-//		
-//		
-//		
-//		steven.requestSwap(bob, Day.valueOf("Tuesday"), Week.valueOf("one"));
-//		steven.requestWipe(Day.valueOf("Wednesday"), Week.valueOf("one"));
-//		
-//		
-//		viewRequests();
-//
-//		
-//		bob.swapSchedule(steven, bob, Day.valueOf("Tuesday"), Week.valueOf("one"));
-//		System.out.println("\n\nApproved Swap Request");
-//		System.out.println("\n\nNEW Schedule");
-//		System.out.println("\nBob's Schedule");
-//		bob.getSchedule();
-//		System.out.println("\nSteven's Schedule");
-//		steven.getSchedule();
-//		
-//		System.out.println("\n\n\n\n");
-//		clearRequests();
-//		viewRequests();
+		
+		System.out.println("\n\n\n\n");
+		clearRequests();
+		viewRequests();
 		
 	}
 	static void generateSchedule() {
@@ -79,26 +73,18 @@ public class ScheduleBuilder {
 				sched[i][j] = 0;
 			}
 		}
-		
 		//Just assign everyone a shift based on their availibility
 		for(int i = 0; i < employees.size()*2; i++) {
 			int id = i/2;
-			System.out.print("ID: " + id + "| ");
 			Employee emp = employees.get(id);
 			int[] availibility = emp.getAvailibility();
 			for(int j = 0; j < 7; j++) {
-				
 				if(sched[i][j] != availibility[j])
 					sched[i][j] = availibility[j];
 				else
 					sched[i][j] = 0;
-				
-				System.out.print(sched[i][j] + " ");
 			}
-			System.out.println();
 		}
-		System.out.println();
-		
 		// Now to remove conflicting schedules
 		// Compare second employee with first, if conflict, give day to first employee
 		// then compare third with second, fourth with third, etc....
@@ -108,15 +94,6 @@ public class ScheduleBuilder {
 					sched[i][j] = 0;
  				}
 			}
-		}
-		
-		
-		//debug
-		for(int i = 0; i < employees.size()*2; i++) {
-			for (int j = 0; j < 7; j++) {
-				System.out.print(sched[i][j] + " ");
-			}
-			System.out.println();
 		}
 		schedules = sched;
 	}
@@ -141,19 +118,6 @@ public class ScheduleBuilder {
 		System.out.println("\nCleared Requests!");
 		requests.clear();;
 	}
-//	static int[] listAvailibility() {
-//		int[] availibility = new int[7];
-//		int i = 0;
-//		Scanner kb = new Scanner(System.in);
-//		for(Day day : Day.values()) {
-//			System.out.println("Availible " + day + "? (0 for No, 1 for Yes)");
-//			int ans = kb.nextInt();
-//			availibility[i++] = ans;
-//			kb.nextLine();
-//		}
-//		System.out.println(Arrays.toString(availibility));
-//		return availibility;
-//	}
 }
 enum Day{
 	Monday,
@@ -178,27 +142,25 @@ class Employee {
 		return name;
 	}
 	double getWeeksPay() {
-		check.hours = getHours(); //Get latest hours
-		System.out.println(check.getAmount());
+		check = new PayStub(getHours(), payRate);
+		System.out.println("Amount: $"+check.getAmount());
 		return check.getAmount();
 	}
 	double getHours() {
 		int daysWorked = 0;
 		//Iterate through this weeks schedule and calculate amount of days worked then perform calculation to get hours
 		for(int i = employeeID*2; i <= employeeID*2+1; i++) {
-			for(int j = 0; j < ScheduleBuilder.schedules[i].length; j++) {
-				if(ScheduleBuilder.schedules[i][j] == 1 || ScheduleBuilder.schedules[i][j] == 2) {
-					daysWorked++;
+				for(int j = 0; j < ScheduleBuilder.schedules[i].length; j++) {
+					if(ScheduleBuilder.schedules[i][j] == 1) {
+						daysWorked++;
+					}
 				}
-			}
 		}
 		return daysWorked * 8;
 	}
 	void getSchedule() {
 		int week = 0;
-		
 		String mon = "", tues = "", weds = "", thurs = "", fri = "", sat = "", sun = "";
-		
 		
 		for(int j = employeeID*2; j <= (employeeID*2+1); j++) {
 			if(week == 0) {
@@ -260,23 +222,19 @@ class Employee {
 				}
 			}
 			week++;
-			System.out.format("+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+%n");
+			System.out.format("+---------------------+---------------------+---------------------+"
+					+ "---------------------+---------------------+---------------------+---------------------+%n");
 			String leftAlignFormat = "| %-19s | %-19s | %-19s | %-19s | %-19s | %-19s | %-19s | %n";
 				System.out.format(leftAlignFormat, mon , tues, weds, thurs, fri, sat, sun);
-			System.out.format("+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+%n");
+			System.out.format("+---------------------+---------------------+---------------------+"
+					+ "---------------------+---------------------+---------------------+---------------------+%n");
 		}
 	}
 	int getID() {
 		return employeeID;
 	}
 	int[] getAvailibility() {
-		// 0 means not availible
-		// 1 means availible during mornings
-		// 2 means availible during nights
-		// 3 means availible day and night
-		
 		return availibility;
-		
 	}
 	public Employee(String name, double payRate, int employeeID, int[] availibility){
 		
@@ -289,7 +247,6 @@ class Employee {
 class ManagementEmployee extends Employee{
 	public ManagementEmployee(String name, double payRate, int employeeID, int[] availibility) {
 		super(name, payRate, employeeID, availibility);
-		check = new PayStub(getHours(), payRate);
 	}
 	boolean wipeSchedule(Employee employee, Day day, Week week) {
 		int row = -1, col = -1;
@@ -381,7 +338,7 @@ class ManagementEmployee extends Employee{
 class LineWorkEmployee extends Employee{
 	public LineWorkEmployee(String name, double payRate, int employeeID, int[] availibility) {
 		super(name, payRate, employeeID, availibility);
-		check = new PayStub(getHours(), payRate);
+//		check = new PayStub(getHours(), payRate);
 	}
 	boolean requestSwap(Employee employee, Day day, Week week) {
 		ScheduleBuilder.requests.add("Requesting Swap: \n" + name + " with " + employee.name + " on " + day + " on Week " + week);
