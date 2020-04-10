@@ -1,12 +1,9 @@
 import java.util.*;
 import java.util.Map.Entry;
 
-// Prototype
 // Assume we build schedules knowing our employee's availability beforehand
 // Biweekly schedule with PayStubs accounting for biweekly work
 
-//TBD: 
-// 4) printMasterSchedule (oh boy)
 
 public class ScheduleBuilder {
 	static Map<Integer, Employee> employees = new HashMap<>();
@@ -42,27 +39,25 @@ public class ScheduleBuilder {
 		steven.getSchedule();
 		steven.getWeeksPay();
 		
-		
-		
+		//Simulate requests for wap and day off
 		steven.requestSwap(bob, Day.valueOf("Wednesday"), Week.valueOf("one"));
 		steven.requestWipe(Day.valueOf("Friday"), Week.valueOf("one"));
-		
-		
 		viewRequests();
-
-		
 		bob.swapSchedule(bob, steven, Day.valueOf("Wednesday"), Week.valueOf("one"));
-		System.out.println("\n\nApproved Swap Request");
+		bob.wipeSchedule(steven, Day.valueOf("Friday"), Week.valueOf("one"));
+		
+		System.out.println("\n\nApproved Steven's Swap Request");
+		System.out.println("Approved Steven's Day Off Request");
 		System.out.println("\n\nNEW Schedule");
 		System.out.println("\nBob's Schedule");
 		bob.getSchedule();
+		System.out.println("\nJanet's Schedule");
+		janet.getSchedule();
 		System.out.println("\nSteven's Schedule");
 		steven.getSchedule();
 		
-		System.out.println("\n\n\n\n");
 		clearRequests();
 		viewRequests();
-		
 	}
 	static void generateSchedule() {
 		
@@ -103,9 +98,6 @@ public class ScheduleBuilder {
         // using for-each loop for iteration over Map.entrySet() 
         for (Entry<Integer, Employee> entry : employees.entrySet())  
             System.out.println("ID: " + entry.getKey() + "\t Name: " + entry.getValue().getName()); 
-	}
-	static void printMasterSchedule() {
-		//Print employee working each day and shift they are working
 	}
 	static void viewRequests() {
 		System.out.println("\n\n----------------------------------------------\nCurrent Requests\n");
@@ -156,6 +148,7 @@ class Employee {
 					}
 				}
 		}
+		//Assume 8 hour shifts
 		return daysWorked * 8;
 	}
 	void getSchedule() {
@@ -350,7 +343,7 @@ class LineWorkEmployee extends Employee{
 	}
 }
 class PayStub{
-	double hours, payRate, minsLate;
+	double hours, payRate;
 	public PayStub(double hours, double payRate) {
 		this.hours = hours;
 		this.payRate = payRate;
