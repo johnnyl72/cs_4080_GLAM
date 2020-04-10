@@ -1,81 +1,139 @@
 package cs4080;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 // Prototype
 // Assume we build schedules knowing our employee's availability beforehand
 // Biweekly schedule with PayStubs accounting for biweekly work
 
 //TBD: 
-// 1) Actual generation of schedules (random numbers for easy way out, or somehow manual input and compare to see if schedule conflict)
-// 2) UI in console to accept I/O
+// 1) Actual generation of schedules -- COMPLETED
+// 2) UI in console to accept I/O -- REMOVED
 // 3) Visual improvements of tables in console -- COMPLETED
 // 4) printMasterSchedule (oh boy)
 
 public class ScheduleBuilder {
-	static Map<String, Integer> employees = new HashMap<>();
+	static Map<Integer, Employee> employees = new HashMap<>();
 	static List<String> requests = new ArrayList<>();
 	//For now we will not focus on creating the schedule lets just seed the data
 	static int[][] schedules =
 		{
-			{1,0,1,1,1,0,1},	// Mon: Day 	Tues: Off 		Wed: Day 	Thurs: Day		Fri: Day 	Sat: Off 	Sun: Day
-			{2,1,0,2,0,1,2},	// Mon: Night 	Tues: Day 		Wed: Off 	Thurs: Night 	Fri: Off 	Sat: Day 	Sun: Night
+			{1,0,1,1,1,0,1},	
+			{0,1,0,0,0,1,0},	
 			
-			{0,2,2,0,2,2,0},	// Mon: Off 	Tues: Night 	Wed: Night 	Thurs: Off 	 	Fri: Night 	Sat: Night 	Sun: Off
-			{0,0,0,0,0,0,0},	// Mon: Off 	Tues: Off 		Wed: Off 	Thurs: Off 	 	Fri: Off 	Sat: Off 	Sun: Off
+			{0,1,0,1,0,1,0},	
+			{1,0,0,0,1,1,0},	
 			
-			{2,2,2,2,2,2,2},	// Mon: Night 	Tues: Night 	Wed: Night 	Thurs: Night	Fri: Night 	Sat: Night 	Sun: Night
-			{1,1,1,1,1,1,1}		// Mon: Day 	Tues: Day 		Wed: Night 	Thurs: Day		Fri: Day 	Sat: Day 	Sun: Day
+			{0,0,0,0,0,0,0},	
+			{1,1,1,1,1,1,1}		
 		};
 	public static void main(String[] args) {
+		
 		//Name, Hourly Rate, EmployeeID
-		ManagementEmployee bob = new ManagementEmployee("Bob", 100.0, 0 );
-		LineWorkEmployee steven = new LineWorkEmployee("Steven", 10.0, 2 );
+		int[] temp1 = {0,1,0,1,0,1,0};
+		int[] temp2 = {1,1,0,1,0,0,1};
+		int[] temp3 = {0,0,1,0,1,0,1};
+		ManagementEmployee bob = new ManagementEmployee("Bob", 100.0, 0, temp1 );
+		ManagementEmployee janet = new ManagementEmployee("Janet", 200.0, 1, temp2 );
+		LineWorkEmployee steven = new LineWorkEmployee("Steven", 10.0, 2, temp3 );
 		
-		employees.put(bob.getName(), bob.getID());
-		employees.put(steven.getName(), steven.getID());
+		employees.put(bob.getID(), bob);
+		employees.put(steven.getID(), steven);
+		employees.put(janet.getID(), janet);
 		printEmployeeList();
-		
+		generateSchedule();
 		System.out.println("\nBob's Schedule");
 		bob.getSchedule();
 		System.out.println("\nSteven's Schedule");
 		steven.getSchedule();
+//		
+//		
+//		
+//		steven.requestSwap(bob, Day.valueOf("Tuesday"), Week.valueOf("one"));
+//		steven.requestWipe(Day.valueOf("Wednesday"), Week.valueOf("one"));
+//		
+//		
+//		viewRequests();
+//
+//		
+//		bob.swapSchedule(steven, bob, Day.valueOf("Tuesday"), Week.valueOf("one"));
+//		System.out.println("\n\nApproved Swap Request");
+//		System.out.println("\n\nNEW Schedule");
+//		System.out.println("\nBob's Schedule");
+//		bob.getSchedule();
+//		System.out.println("\nSteven's Schedule");
+//		steven.getSchedule();
+//		
+//		System.out.println("\n\n\n\n");
+//		clearRequests();
+//		viewRequests();
+		
+	}
+	static void generateSchedule() {
+		
+		int[][] sched = new int[employees.size()*2][7];
+		//Generate empty schedule
+		for(int i = 0; i < employees.size()*2; i++) {
+			for(int j = 0; j < 7; j++ ) {
+				sched[i][j] = 0;
+			}
+		}
+		
+		//Just assign everyone a shift based on their availibility
+		for(int i = 0; i < employees.size()*2; i++) {
+			int id = i/2;
+			System.out.print("ID: " + id + "| ");
+			Employee emp = employees.get(id);
+			int[] availibility = emp.getAvailibility();
+			for(int j = 0; j < 7; j++) {
+				
+				if(sched[i][j] != availibility[j])
+					sched[i][j] = availibility[j];
+				else
+					sched[i][j] = 0;
+				
+				System.out.print(sched[i][j] + " ");
+			}
+			System.out.println();
+		}
+		System.out.println();
+		
+		// Now to remove conflicting schedules
+		// Compare second employee with first, if conflict, give day to first employee
+		// then compare third with second, fourth with third, etc....
+		for(int i = 2; i < sched.length; i++) {
+			for (int j = 0; j < 7; j++) {
+				if(sched[i-2][j] == sched[i][j]) {
+					sched[i][j] = 0;
+ 				}
+			}
+		}
 		
 		
-		
-		steven.requestSwap(bob, Day.valueOf("Tuesday"), Week.valueOf("one"));
-		steven.requestWipe(Day.valueOf("Wednesday"), Week.valueOf("one"));
-		
-		
-		viewRequests();
-
-		
-		bob.swapSchedule(steven, bob, Day.valueOf("Tuesday"), Week.valueOf("one"));
-		System.out.println("\nApproved Swap Request");
-		System.out.println("\n\n\n\n\nNEW Schedule");
-		System.out.println("\nBob's Schedule");
-		bob.getSchedule();
-		System.out.println("\nSteven's Schedule");
-		steven.getSchedule();
-		
-		clearRequests();
-		viewRequests();
-		
+		//debug
+		for(int i = 0; i < employees.size()*2; i++) {
+			for (int j = 0; j < 7; j++) {
+				System.out.print(sched[i][j] + " ");
+			}
+			System.out.println();
+		}
+		schedules = sched;
 	}
 	static void printEmployeeList() {
 		System.out.println("Employee List:");
 		
         // using for-each loop for iteration over Map.entrySet() 
-        for (Map.Entry<String,Integer> entry : employees.entrySet())  
-            System.out.println("Name: " + entry.getKey() + "\t ID: " + entry.getValue()); 
+        for (Entry<Integer, Employee> entry : employees.entrySet())  
+            System.out.println("ID: " + entry.getKey() + "\t Name: " + entry.getValue().getName()); 
 	}
 	static void printMasterSchedule() {
 		//Print employee working each day and shift they are working
 	}
 	static void viewRequests() {
-		System.out.println("\n\n----------------------------------------------\n\nCurrent Requests\n");
+		System.out.println("\n\n----------------------------------------------\nCurrent Requests\n");
 		for(String x: requests) {
-			System.out.println(x + "\n");
+			System.out.println(x);
 		}
 		System.out.println("----------------------------------------------");
 	}
@@ -83,6 +141,19 @@ public class ScheduleBuilder {
 		System.out.println("\nCleared Requests!");
 		requests.clear();;
 	}
+//	static int[] listAvailibility() {
+//		int[] availibility = new int[7];
+//		int i = 0;
+//		Scanner kb = new Scanner(System.in);
+//		for(Day day : Day.values()) {
+//			System.out.println("Availible " + day + "? (0 for No, 1 for Yes)");
+//			int ans = kb.nextInt();
+//			availibility[i++] = ans;
+//			kb.nextLine();
+//		}
+//		System.out.println(Arrays.toString(availibility));
+//		return availibility;
+//	}
 }
 enum Day{
 	Monday,
@@ -102,6 +173,7 @@ class Employee {
 	double payRate;
 	int employeeID;
 	PayStub check;
+	int[] availibility;
 	String getName() {
 		return name;
 	}
@@ -139,50 +211,25 @@ class Employee {
 				if(ScheduleBuilder.schedules[j][i] == 1) {
 					switch(i) {
 						case 0:
-							mon = "Monday: Morning";
+							mon = "Monday: Working";
 							break;
 						case 1:
-							tues = "Tuesday: Morning";
+							tues = "Tuesday: Working";
 							break;
 						case 2:
-							weds = "Wedneday: Morning";
+							weds = "Wedneday: Working";
 							break;
 						case 3:
-							thurs = "Thursday: Morning";
+							thurs = "Thursday: Working";
 							break;
 						case 4:
-							fri = "Friday: Morning";
+							fri = "Friday: Working";
 							break;
 						case 5:
-							sat = "Saturday: Morning";
+							sat = "Saturday: Working";
 							break;
 						case 6:
-							sun = "Sunday: Morning";
-							break;
-					}
-				}
-				else if (ScheduleBuilder.schedules[j][i] == 2) {
-					switch(i) {
-						case 0:
-							mon = "Monday: Night";
-							break;
-						case 1:
-							tues = "Tuesday: Night";
-							break;
-						case 2:
-							weds = "Wedneday: Night";
-							break;
-						case 3:
-							thurs = "Thursday: Night";
-							break;
-						case 4:
-							fri = "Friday: Night";
-							break;
-						case 5:
-							sat = "Saturday: Night";
-							break;
-						case 6:
-							sun = "Sunday: Night";
+							sun = "Sunday: Working";
 							break;
 					}
 				}
@@ -222,15 +269,26 @@ class Employee {
 	int getID() {
 		return employeeID;
 	}
-	public Employee(String name, double payRate, int employeeID){
+	int[] getAvailibility() {
+		// 0 means not availible
+		// 1 means availible during mornings
+		// 2 means availible during nights
+		// 3 means availible day and night
+		
+		return availibility;
+		
+	}
+	public Employee(String name, double payRate, int employeeID, int[] availibility){
+		
+		this.availibility = availibility;
 		this.name = name;
 		this.payRate = payRate;
 		this.employeeID = employeeID;
 	}
 }
 class ManagementEmployee extends Employee{
-	public ManagementEmployee(String name, double payRate, int employeeID) {
-		super(name, payRate, employeeID);
+	public ManagementEmployee(String name, double payRate, int employeeID, int[] availibility) {
+		super(name, payRate, employeeID, availibility);
 		check = new PayStub(getHours(), payRate);
 	}
 	boolean wipeSchedule(Employee employee, Day day, Week week) {
@@ -321,8 +379,8 @@ class ManagementEmployee extends Employee{
 	}
 }
 class LineWorkEmployee extends Employee{
-	public LineWorkEmployee(String name, double payRate, int employeeID) {
-		super(name, payRate, employeeID);
+	public LineWorkEmployee(String name, double payRate, int employeeID, int[] availibility) {
+		super(name, payRate, employeeID, availibility);
 		check = new PayStub(getHours(), payRate);
 	}
 	boolean requestSwap(Employee employee, Day day, Week week) {
