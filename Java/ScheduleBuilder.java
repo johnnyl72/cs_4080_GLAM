@@ -55,9 +55,56 @@ public class ScheduleBuilder {
 		janet.getSchedule();
 		System.out.println("\nSteven's Schedule");
 		steven.getSchedule();
+		System.out.println("\n MASTER SCHEDULE");
 		
-		clearRequests();
-		viewRequests();
+		printMasterSchedule();
+		
+//		clearRequests();
+//		viewRequests();
+	}
+	static void printMasterSchedule() {
+		
+		List<String> week1 = new ArrayList<>();
+		List<String> week2 = new ArrayList<>();
+		
+		//Week 1
+		for(int i = 0; i < 7; i++) {
+			for(int j = 0; j < schedules.length; j = j+2) {
+				if(schedules[j][i] == 1) {
+					week1.add(employees.get(j/2).getName());
+					break;
+				}
+				else if (j == schedules.length-2 && schedules[j][i] == 0) {
+					week1.add("Empty");
+				}
+			}
+		}
+		
+		//Week 2
+		for(int i = 0; i < 7; i++) {
+			for(int j = 1; j < schedules.length; j = j+2) {
+				if(schedules[j][i] == 1) {
+					week2.add(employees.get(j/2).getName());
+					break;
+				}
+				else if (j == schedules.length-1 && schedules[j][i] == 0) {
+					week2.add("Empty");
+				}
+			}
+		}
+		
+		String leftAlignFormat = "| %-19s | %-19s | %-19s | %-19s | %-19s | %-19s | %-19s | %n";
+		System.out.println("Week 1");
+		System.out.format("+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+%n");
+		System.out.format(leftAlignFormat, "Monday" , "Tuesday" , "Wednesday" , "Thursday" , "Friday" , "Saturday" , "Sunday" );
+		System.out.format(leftAlignFormat, week1.get(0) , week1.get(1), week1.get(2), week1.get(3), week1.get(4), week1.get(5), week1.get(6));
+		System.out.format("+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+%n");
+		System.out.println("Week 2");
+		System.out.format("+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+%n");
+		System.out.format(leftAlignFormat, "Monday" , "Tuesday" , "Wednesday" , "Thursday" , "Friday" , "Saturday" , "Sunday" );
+		System.out.format(leftAlignFormat, week1.get(0) , week2.get(1), week2.get(2), week2.get(3), week2.get(4), week2.get(5), week2.get(6));
+		System.out.format("+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+---------------------+%n");
+	
 	}
 	static void generateSchedule() {
 		
