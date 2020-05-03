@@ -1,3 +1,5 @@
+package cs4080;
+
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -12,6 +14,7 @@ public class ScheduleBuilder {
 	
 	public static void main(String[] args) {
 		
+		long start = System.nanoTime();
 		//Sample availibility schedules
 		int[] temp1 = {1,1,0,1,0,1,0}; //Monday, Tuesday, Thursday, Saturday
 		int[] temp2 = {1,1,0,1,0,0,1}; //Monday, Tuesday, Thursday, Sunday
@@ -58,9 +61,9 @@ public class ScheduleBuilder {
 		System.out.println("\n MASTER SCHEDULE");
 		
 		printMasterSchedule();
-		
-//		clearRequests();
-//		viewRequests();
+		long timeInNano = System.nanoTime() - start;
+		System.out.println(timeInNano);
+
 	}
 	static void printMasterSchedule() {
 		
@@ -219,7 +222,7 @@ class Employee {
 							tues = "Tuesday: Working";
 							break;
 						case 2:
-							weds = "Wednesday: Working";
+							weds = "Wedneday: Working";
 							break;
 						case 3:
 							thurs = "Thursday: Working";
@@ -244,7 +247,7 @@ class Employee {
 							tues = "Tuesday: Off";
 							break;
 						case 2:
-							weds = "Wednesday: Off";
+							weds = "Wedneday: Off";
 							break;
 						case 3:
 							thurs = "Thursday: Off";
@@ -276,12 +279,17 @@ class Employee {
 	int[] getAvailibility() {
 		return availibility;
 	}
+	void changeName(String name) {
+		this.name = name;
+	}
+	
 	public Employee(String name, double payRate, int employeeID, int[] availibility){
 		
 		this.availibility = availibility;
 		this.name = name;
 		this.payRate = payRate;
 		this.employeeID = employeeID;
+
 	}
 }
 class ManagementEmployee extends Employee{
@@ -378,7 +386,6 @@ class ManagementEmployee extends Employee{
 class LineWorkEmployee extends Employee{
 	public LineWorkEmployee(String name, double payRate, int employeeID, int[] availibility) {
 		super(name, payRate, employeeID, availibility);
-//		check = new PayStub(getHours(), payRate);
 	}
 	boolean requestSwap(Employee employee, Day day, Week week) {
 		ScheduleBuilder.requests.add("Requesting Swap: \n" + name + " with " + employee.name + " on " + day + " on Week " + week);
