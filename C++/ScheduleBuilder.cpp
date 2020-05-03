@@ -309,3 +309,20 @@ public:
 		return true;
 	}
 };
+
+int main() {
+	ScheduleBuilder* schedule = new ScheduleBuilder();
+	int temp1[] = { 1,1,0,1,0,1,0 }; //Monday, Tuesday, Thursday, Saturday
+	int temp2[] = { 1,1,0,1,0,0,1 }; //Monday, Tuesday, Thursday, Sunday
+	int temp3[] = { 0,0,1,0,1,0,1 }; //Wednesday, Friday, Sunday
+
+	ManagementEmployee *bob = new ManagementEmployee("Bob", 100.0, 0, temp1);
+	ManagementEmployee* janet = new ManagementEmployee("Janet", 200.0, 1, temp2);
+	LineWorkEmployee* steven = new LineWorkEmployee("Steven", 10.0, 2, temp3);
+
+	schedule->employees->insert(pair<int,ManagementEmployee>(bob->getID(), *bob));
+	schedule->employees->insert(pair<int,ManagementEmployee>(janet->getID(), *janet));
+	schedule->employees->insert(pair<int,LineWorkEmployee>(steven->getID(), *steven));
+
+
+}
