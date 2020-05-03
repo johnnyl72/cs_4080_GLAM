@@ -219,7 +219,7 @@ class Employee {
 							tues = "Tuesday: Working";
 							break;
 						case 2:
-							weds = "Wedneday: Working";
+							weds = "Wednesday: Working";
 							break;
 						case 3:
 							thurs = "Thursday: Working";
@@ -244,7 +244,7 @@ class Employee {
 							tues = "Tuesday: Off";
 							break;
 						case 2:
-							weds = "Wedneday: Off";
+							weds = "Wednesday: Off";
 							break;
 						case 3:
 							thurs = "Thursday: Off";
