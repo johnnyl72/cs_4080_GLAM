@@ -198,3 +198,114 @@ public:
 	}
 	
 };
+
+class ManagementEmployee : public Employee {
+public:
+	ManagementEmployee(string name, double payRate, int employeeID, int availability[]) :
+		Employee(name, payRate, employeeID, availability) {
+
+	}
+	bool wipeSchedule(Employee employee, Day day, Week week) {
+		int row = -1, col = -1;
+		int id = employee.employeeID * 2; // 0
+
+		switch (day) {
+		case Monday:
+			col = 0;
+			break;
+		case Tuesday:
+			col = 1;
+			break;
+		case Wednesday:
+			col = 2;
+			break;
+		case Thursday:
+			col = 3;
+			break;
+		case Friday:
+			col = 4;
+			break;
+		case Saturday:
+			col = 5;
+			break;
+		case Sunday:
+			col = 6;
+			break;
+		}
+		switch (week) {
+		case one:
+			row = 0;
+			break;
+		case two:
+			row = 1;
+			break;
+		}
+
+		ScheduleBuilder::schedules[id + row][col] = 0;
+
+		return true;
+	}
+	bool swapSchedule(Employee employee1, Employee employee2, Day day, Week week) {
+
+		int row = -1, col = -1;
+		int id1 = employee1.employeeID * 2; // 0
+		int id2 = employee2.employeeID * 2; // 2
+
+		switch (day) {
+		case Monday:
+			col = 0;
+			break;
+		case Tuesday:
+			col = 1;
+			break;
+		case Wednesday:
+			col = 2;
+			break;
+		case Thursday:
+			col = 3;
+			break;
+		case Friday:
+			col = 4;
+			break;
+		case Saturday:
+			col = 5;
+			break;
+		case Sunday:
+			col = 6;
+			break;
+		}
+		switch (week) {
+		case one:
+			row = 0;
+			break;
+		case two:
+			row = 1;
+			break;
+		}
+		//Put employee1 into temp var
+		int temp = ScheduleBuilder::schedules[id1 + row][col];
+		//Override employee1 with employee2
+		ScheduleBuilder::schedules[id1 + row][col] = ScheduleBuilder::schedules[id2 + row][col];
+		//Now put temp into employee1
+		ScheduleBuilder::schedules[id2 + row][col] = temp;
+
+		return true;
+	}
+
+};
+
+class LineWorkEmployee : public Employee {
+public:
+	LineWorkEmployee(string name, double payRate, int employeeID, int availability[]) :
+		Employee(name, payRate, employeeID, availability) {
+
+	}
+	bool requestSwap(Employee employee, Day day, Week week) {
+		ScheduleBuilder::requests->push_back("Requesting Swap: \n" + name + " with " + employee.name + " on " + dayToString(day) +" on Week " + weekToString(week));
+		return true;
+	}
+	bool requestWipe(Day day, Week week) {
+		ScheduleBuilder::requests->push_back("Requesting day off: \n" + name + " on " + dayToString(day) + " on Week " + weekToString(week));
+		return true;
+	}
+};
