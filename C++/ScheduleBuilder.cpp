@@ -16,17 +16,39 @@ enum Day {
 	Sunday
 };
 
+const char* dayToString(Day day)
+{
+	switch (day) {
+	case Monday:    return "Monday";
+	case Tuesday:   return "Tuesday";
+	case Wednesday: return "Wednesday";
+	case Thursday:  return "Thursday";
+	case Friday:    return "Friday";
+	default:      return "[Unknown Day]";
+	}
+}
+
 enum Week {
 	one,
 	two
 };
 
-struct ScheduleBuilder : public Employee {
+const char* weekToString(Week week)
+{
+	switch (week) {
+	case one:    return "one";
+	case two:   return "two";
+	default:      return "[Unknown Week]";
+	}
+}
+
+class ScheduleBuilder : public Employee {
 public:
-	static map<int, Employee> employees;
-	static list<string> requests;
-	static int schedules[6][6];
+	static map<int, Employee> *employees;
+	static list<string> *requests;
+	static int schedules[employees->size*2][7];
 };
+
 
 class PayStub
 {
@@ -176,3 +198,131 @@ public:
 	}
 	
 };
+
+class ManagementEmployee : public Employee {
+public:
+	ManagementEmployee(string name, double payRate, int employeeID, int availability[]) :
+		Employee(name, payRate, employeeID, availability) {
+
+	}
+	bool wipeSchedule(Employee employee, Day day, Week week) {
+		int row = -1, col = -1;
+		int id = employee.employeeID * 2; // 0
+
+		switch (day) {
+		case Monday:
+			col = 0;
+			break;
+		case Tuesday:
+			col = 1;
+			break;
+		case Wednesday:
+			col = 2;
+			break;
+		case Thursday:
+			col = 3;
+			break;
+		case Friday:
+			col = 4;
+			break;
+		case Saturday:
+			col = 5;
+			break;
+		case Sunday:
+			col = 6;
+			break;
+		}
+		switch (week) {
+		case one:
+			row = 0;
+			break;
+		case two:
+			row = 1;
+			break;
+		}
+
+		ScheduleBuilder::schedules[id + row][col] = 0;
+
+		return true;
+	}
+	bool swapSchedule(Employee employee1, Employee employee2, Day day, Week week) {
+
+		int row = -1, col = -1;
+		int id1 = employee1.employeeID * 2; // 0
+		int id2 = employee2.employeeID * 2; // 2
+
+		switch (day) {
+		case Monday:
+			col = 0;
+			break;
+		case Tuesday:
+			col = 1;
+			break;
+		case Wednesday:
+			col = 2;
+			break;
+		case Thursday:
+			col = 3;
+			break;
+		case Friday:
+			col = 4;
+			break;
+		case Saturday:
+			col = 5;
+			break;
+		case Sunday:
+			col = 6;
+			break;
+		}
+		switch (week) {
+		case one:
+			row = 0;
+			break;
+		case two:
+			row = 1;
+			break;
+		}
+		//Put employee1 into temp var
+		int temp = ScheduleBuilder::schedules[id1 + row][col];
+		//Override employee1 with employee2
+		ScheduleBuilder::schedules[id1 + row][col] = ScheduleBuilder::schedules[id2 + row][col];
+		//Now put temp into employee1
+		ScheduleBuilder::schedules[id2 + row][col] = temp;
+
+		return true;
+	}
+
+};
+
+class LineWorkEmployee : public Employee {
+public:
+	LineWorkEmployee(string name, double payRate, int employeeID, int availability[]) :
+		Employee(name, payRate, employeeID, availability) {
+
+	}
+	bool requestSwap(Employee employee, Day day, Week week) {
+		ScheduleBuilder::requests->push_back("Requesting Swap: \n" + name + " with " + employee.name + " on " + dayToString(day) +" on Week " + weekToString(week));
+		return true;
+	}
+	bool requestWipe(Day day, Week week) {
+		ScheduleBuilder::requests->push_back("Requesting day off: \n" + name + " on " + dayToString(day) + " on Week " + weekToString(week));
+		return true;
+	}
+};
+
+int main() {
+	ScheduleBuilder* schedule = new ScheduleBuilder();
+	int temp1[] = { 1,1,0,1,0,1,0 }; //Monday, Tuesday, Thursday, Saturday
+	int temp2[] = { 1,1,0,1,0,0,1 }; //Monday, Tuesday, Thursday, Sunday
+	int temp3[] = { 0,0,1,0,1,0,1 }; //Wednesday, Friday, Sunday
+
+	ManagementEmployee *bob = new ManagementEmployee("Bob", 100.0, 0, temp1);
+	ManagementEmployee* janet = new ManagementEmployee("Janet", 200.0, 1, temp2);
+	LineWorkEmployee* steven = new LineWorkEmployee("Steven", 10.0, 2, temp3);
+
+	schedule->employees->insert(pair<int,ManagementEmployee>(bob->getID(), *bob));
+	schedule->employees->insert(pair<int,ManagementEmployee>(janet->getID(), *janet));
+	schedule->employees->insert(pair<int,LineWorkEmployee>(steven->getID(), *steven));
+
+
+}
