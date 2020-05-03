@@ -42,11 +42,11 @@ const char* weekToString(Week week)
 	}
 }
 
-struct ScheduleBuilder : public Employee {
+class ScheduleBuilder : public Employee {
 public:
-	static map<int, Employee> employees;
-	static list<string> requests;
-	static int schedules[6][6];
+	static map<int, Employee> *employees;
+	static list<string> *requests;
+	static int schedules[employees->size*2][7];
 };
 
 
