@@ -16,10 +16,31 @@ enum Day {
 	Sunday
 };
 
+const char* dayToString(Day day)
+{
+	switch (day) {
+	case Monday:    return "Monday";
+	case Tuesday:   return "Tuesday";
+	case Wednesday: return "Wednesday";
+	case Thursday:  return "Thursday";
+	case Friday:    return "Friday";
+	default:      return "[Unknown Day]";
+	}
+}
+
 enum Week {
 	one,
 	two
 };
+
+const char* weekToString(Week week)
+{
+	switch (week) {
+	case one:    return "one";
+	case two:   return "two";
+	default:      return "[Unknown Week]";
+	}
+}
 
 struct ScheduleBuilder : public Employee {
 public:
@@ -27,6 +48,7 @@ public:
 	static list<string> requests;
 	static int schedules[6][6];
 };
+
 
 class PayStub
 {
