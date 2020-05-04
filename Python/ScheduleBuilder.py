@@ -1,14 +1,14 @@
 import time
 start_time = time.time()
+DaysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 class Employee:
     def __init__(self, name,  payrate, employeeid, availablity):
-        self.DaysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday','Saturday','Sunday']
         self.name = name
         self.payRate = payrate
         self.ID = employeeid
         self.availability = availablity
-        self.schedule = [{self.DaysOfWeek[i]: availablity[i] for i in range(len(self.DaysOfWeek))}, {self.DaysOfWeek[i]: availablity[i] for i in range(len(self.DaysOfWeek))}]
+        self.schedule = [{DaysOfWeek[i]: availablity[i] for i in range(len(DaysOfWeek))}, {DaysOfWeek[i]: availablity[i] for i in range(len(DaysOfWeek))}]
 
     # Returns the Name of the Employee
     def getName(self):
@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
     printMasterSchedule(Schedule)
 
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print("\nRUNTIME:", (time.time() - start_time), "seconds")
 
 
 
