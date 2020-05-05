@@ -214,25 +214,3 @@ if __name__ == "__main__":
     printMasterSchedule(Schedule)
 
     print("\nRUNTIME:", (time.time() - start_time), "seconds")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
