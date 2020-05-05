@@ -3,7 +3,11 @@
 #include <string>
 #include <map>
 #include <list>
+#include <chrono>
+
 using namespace std;
+using namespace std::chrono;
+
 class Employee; class PayStub; class ManagementEmployee; class LineWorkEmployee;
 map<int,Employee> employees;
 list<string> requests;
@@ -406,6 +410,7 @@ void printMasterSchedule(){
 }
 
 int main() {
+    auto start = high_resolution_clock::now();
 
     int temp1[] = { 1,1,0,1,0,1,0 }; //Monday, Tuesday, Thursday, Saturday
     int temp2[] = { 1,1,0,1,0,0,1 }; //Monday, Tuesday, Thursday, Sunday
@@ -460,6 +465,10 @@ int main() {
     cout << "MASTER SCHEDULE "<< endl;
     printMasterSchedule();
 
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop - start);
+    cout << "\n\nRUNTIME: " << duration.count() <<" milliseconds" << endl;
+    
     return 0;
 
 };
